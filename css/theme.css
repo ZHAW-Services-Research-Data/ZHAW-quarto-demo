@@ -1,0 +1,127 @@
+/* =============================================================================
+   Quarto HTML theme (minimal, print-like styling)
+   - Base font: Helvetica (fallback: Arial, sans-serif)
+   - Body size: 12pt, black text on white background
+   - Fixed content column centered in the viewport
+   - Header logo aligned to the same left edge as the text column
+
+   Tip: Keep the values in the "Layout variables" section in sync across
+   #quarto-content and .page-logo-wrap to maintain perfect alignment.
+   ========================================================================== */
+
+/* -----------------------------------------------------------------------------
+   Layout variables
+   -------------------------------------------------------------------------- */
+:root {
+  /* Maximum width of the main content column. */
+  --content-max-width: 900px;
+
+  /* Horizontal padding inside the content column. */
+  --content-padding-x: 1rem;
+}
+
+/* -----------------------------------------------------------------------------
+   Base typography and colors
+   -------------------------------------------------------------------------- */
+body {
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 12pt;
+  color: #000;
+  background-color: #fff;
+}
+
+/* Headings inherit the same font and color for a consistent look. */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: Helvetica, Arial, sans-serif;
+  color: #000;
+}
+
+/* Figure captions: slightly smaller than body text. */
+.figure-caption {
+  font-size: 10pt;
+  color: #000;
+}
+
+/* Monospace for code. Keep slightly smaller to reduce visual dominance. */
+pre,
+code {
+  font-family: "Courier New", monospace;
+  font-size: 10.5pt;
+}
+
+/* Links: standard blue color, underline on hover for clarity. */
+a,
+a:visited,
+a:hover,
+a:focus,
+a:active {
+  color: #0064A6;
+  text-decoration: underline;
+}
+
+
+/* -----------------------------------------------------------------------------
+   Plotly
+   -------------------------------------------------------------------------- */
+/* Ensure Plotly hover labels match document typography.
+   Note: !important is used because Plotly sets inline styles. */
+.plotly .hovertext {
+  font-family: Helvetica, Arial, sans-serif !important;
+  font-size: 12pt !important;
+  color: #000 !important;
+}
+
+/* -----------------------------------------------------------------------------
+   Page layout: centered fixed-width content
+   -------------------------------------------------------------------------- */
+#quarto-content {
+  max-width: var(--content-max-width);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--content-padding-x);
+  padding-right: var(--content-padding-x);
+}
+
+/* Optional: if you use a Quarto navbar and want it aligned with the content.
+   If you don't use a navbar, you can remove this block safely. */
+.navbar .container-fluid {
+  max-width: var(--content-max-width);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--content-padding-x);
+  padding-right: var(--content-padding-x);
+}
+
+/* -----------------------------------------------------------------------------
+   Header logo (injected via include-before-body)
+   -------------------------------------------------------------------------- */
+.page-logo-wrap {
+  max-width: var(--content-max-width);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--content-padding-x);
+  padding-right: var(--content-padding-x);
+}
+
+/* Spacing around the logo inside the aligned content column */
+.page-logo {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  margin-left: -5rem;
+}
+
+/* Keep intrinsic logo size (no scaling) */
+.page-logo img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: none;
+  max-height: none;
+}
+
+
