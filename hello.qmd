@@ -20,16 +20,26 @@ execute:
 server: shiny
 ---
 
-
-
 ```{r}
 #| label: load-packages
 #| include: false
 
-library(tidyverse)
+library(dplyr)
+library(tidyr)
 library(palmerpenguins)
+library(ggplot2)
 library(plotly)
 library(shiny)
+```
+
+```{r}
+#| label: configurations
+#| include: false
+
+# y-axis limits for plots
+x_limits <- c(170, 230)
+y_limits <- c(30, 60)
+colors <- c("#DDAA33", "#BB5566", "#004488")
 ```
 
 ## Graphics and interactive widgets in Quarto
@@ -40,17 +50,13 @@ I use this document to test some of its features, specifically the ability to in
 
 ## Meet the penguins
 
-![](https://raw.githubusercontent.com/quarto-dev/quarto-web/main/docs/get-started/hello/rstudio/lter_penguins.png){style="float:center;" fig-alt="Illustration of three species of Palmer Archipelago penguins: Chinstrap, Gentoo, and Adelie. Artwork by @allison_horst." width="401"}
-
-The `penguins` data from the [palmerpenguins](https://allisonhorst.github.io/palmerpenguins "palmerpenguins R package") package contains size measurements for `{r} nrow(penguins)` penguins from three species observed on three islands in the Palmer Archipelago, Antarctica.
-
-To demonstrate some graphics, I'll gladly use this dataset.
+The `penguins` data from the [palmerpenguins](https://allisonhorst.github.io/palmerpenguins "palmerpenguins R package") package contains size measurements for `{r} nrow(penguins)` penguins from three species observed on three islands in the Palmer Archipelago, Antarctica. To demonstrate some graphics, I'll gladly use this dataset.
 
 ## Visualizations
 
-### Simple `ggplot2` plot
+### Simple ggplot2 plot
 
-The plot below shows the relationship between flipper and bill lengths of these penguins
+The plot below shows the relationship between flipper and bill lengths of these penguins as a static `ggplot2` graphic.
 
 ```{r}
 #| label: ggplot-penguins
@@ -74,20 +80,22 @@ p_ggplot <- ggplot(
   )
 ) +
   geom_point(na.rm = TRUE) +
-  scale_color_manual(values = c("darkorange", "purple", "cyan4")) +
+  scale_color_manual(values = colors) +
   labs(
     title = "Flipper and bill length",
-    subtitle = "Dimensions for penguins at Palmer Station LTER",
     x = "Flipper length (mm)", y = "Bill length (mm)",
     color = "Penguin species", shape = "Penguin species"
   ) +
+  xlim(x_limits) +
+  ylim(y_limits) +
   theme_minimal()
-
 
 p_ggplot
 ```
 
 ### Interactive Plotly version
+
+This next plot is an interactive version of the same graphic, created with the `plotly` package. Hovering over points reveals additional information about each penguin.
 
 ```{r}
 #| label: plotly-penguins
@@ -95,7 +103,67 @@ p_ggplot
 #| echo: false
 
 ggplotly(p_ggplot, tooltip = "text")
-
 ```
 
+### Shiny interactive widget
 
+This final example is an interactive `shiny` widget embedded in the Quarto document. Use the dropdown menu to select a penguin species, and the plot will update accordingly.
+
+```{r}
+#| label: shiny-ui
+
+shiny::fluidPage(
+shiny::selectInput(
+inputId = "species",
+label = "Choose penguin species:",
+choices = c("Adelie", "Chinstrap", "Gentoo"),
+selected = "Adelie"
+),
+shiny::plotOutput("penguin_plot", height = "400px")
+)
+```
+
+```{r}
+#| label: shiny-server
+#| context: server
+
+x_limits <- c(170, 230)
+y_limits <- c(30, 60)
+colors <- c(Adelie = "#DDAA33", Chinstrap = "#BB5566", Gentoo = "#004488")
+pch_map <- c(
+  Adelie = 16,
+  Chinstrap = 17,
+  Gentoo = 15
+)
+
+output$penguin_plot <- shiny::renderPlot({
+  dat <- palmerpenguins::penguins
+  dat <- dat[dat$species == input$species, ]
+  dat <- dat[complete.cases(dat$flipper_length_mm, dat$bill_length_mm), ]
+
+  point_col <- unname(colors[[as.character(input$species)]])
+  point_pch <- unname(pch_map[[as.character(input$species)]])
+
+  # Make base R plotting look closer to ggplot2::theme_minimal()
+  op <- par(
+    mar = c(4.2, 4.2, 2.2, 1.0),  # margins: bottom, left, top, right
+    bty = "n",                    # <-- removes the left/bottom black lines
+    las = 1                       # horizontal y-axis labels
+  )
+  on.exit(par(op), add = TRUE)
+
+  plot(
+    x = dat$flipper_length_mm,
+    y = dat$bill_length_mm,
+    xlab = "Flipper length (mm)",
+    ylab = "Bill length (mm)",
+    xlim = x_limits,
+    ylim = y_limits,
+    main = paste("Bill length vs flipper length —", input$species),
+    pch = point_pch,
+    col = point_col,
+    panel.first = grid(col = "grey90")  # light grid like theme_minimal
+  )
+})
+
+```
